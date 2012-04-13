@@ -1,0 +1,11 @@
+USE DbApp
+GO
+
+SELECT * FROM Category
+SELECT * FROM Product
+
+/*
+DELETE FROM Product
+DELETE FROM Category
+DBCC CHECKIDENT('Category', RESEED, 0)
+*/
