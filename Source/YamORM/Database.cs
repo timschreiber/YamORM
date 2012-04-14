@@ -1,4 +1,29 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Database.cs">
+//     Copyright (c) 2012 Timothy P. Schreiber
+//     Permission is hereby granted, free of charge, to any person
+//     obtaining a copy of this software and associated documentation
+//     files (the "Software"), to deal in the Software without
+//     restriction, including without limitation the rights to use, copy,
+//     modify, merge, publish, distribute, sublicense, and/or sell copies
+//     of the Software, and to permit persons to whom the Software is
+//     furnished to do so, subject to the following conditions:
+//
+//     The above copyright notice and this permission notice shall be
+//     included in all copies or substantial portions of the Software.
+//
+//     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+//     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+//     DEALINGS IN THE SOFTWARE.
+// </copyright>
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -12,16 +37,18 @@ namespace YamORM
         private readonly IDbConnection _connection;
         private readonly IList<TableConfiguration> _tableConfigurations;
         private IDbTransaction _transaction;
+        private string _providerName;
         #endregion
 
         #region Constructors
-        internal Database(IDbConnection connection, IList<TableConfiguration> tableConfigurations)
+        internal Database(IDbConnection connection, IList<TableConfiguration> tableConfigurations, string providerName)
         {
             _connection = connection;
             if (_connection.State != ConnectionState.Open)
                 _connection.Open();
 
             _tableConfigurations = tableConfigurations;
+            _providerName = providerName;
         }
         #endregion
 
@@ -116,9 +143,9 @@ namespace YamORM
             string[] parameterNames = propertyMaps.Select(x => x.ParameterName).ToArray();
 
             //TODO: How to handle different database dialects?
-            string commandText = string.Format("INSERT INTO {0}({1}) VALUES({2})", tableConfiguration.TableMap.TableName, string.Join(", ", columnNames), string.Join(", ", parameterNames));
+            string commandText = string.Format("INSERT INTO {0}({1}) VALUES({2});", tableConfiguration.TableMap.TableName, string.Join(", ", columnNames), string.Join(", ", parameterNames));
             if (keyIsIdentity)
-                commandText = string.Format("{0}; SELECT SCOPE_IDENTITY()", commandText);
+                commandText = string.Format("{0} {1}", commandText, Constants.IDENTITY_DIALECT[_providerName]);
 
             using (IDbCommand command = _connection.CreateCommand())
             {

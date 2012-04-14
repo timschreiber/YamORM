@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="KeyType.cs">
+// <copyright file="Constants.cs">
 //     Copyright (c) 2012 Timothy P. Schreiber
 //     Permission is hereby granted, free of charge, to any person
 //     obtaining a copy of this software and associated documentation
@@ -23,12 +23,18 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace YamORM
 {
-    internal enum KeyType
+    internal static class Constants
     {
-        None,
-        Key,
-        Identity
+        public const string DEFAULT_PROVIDER_NAME = "System.Data.SqlClient";
+
+        public static readonly IDictionary<string, string> IDENTITY_DIALECT = new Dictionary<string, string>
+        {
+            { "System.Data.SqlClient", "SELECT SCOPE_IDENTITY();" },
+            { "MySql.Data.MySqlClient", "SELECT LAST_INSERT_ID();" }
+        }; 
     }
 }

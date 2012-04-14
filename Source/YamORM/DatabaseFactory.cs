@@ -1,4 +1,29 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// <copyright file="DatabaseFactory.cs">
+//     Copyright (c) 2012 Timothy P. Schreiber
+//     Permission is hereby granted, free of charge, to any person
+//     obtaining a copy of this software and associated documentation
+//     files (the "Software"), to deal in the Software without
+//     restriction, including without limitation the rights to use, copy,
+//     modify, merge, publish, distribute, sublicense, and/or sell copies
+//     of the Software, and to permit persons to whom the Software is
+//     furnished to do so, subject to the following conditions:
+//
+//     The above copyright notice and this permission notice shall be
+//     included in all copies or substantial portions of the Software.
+//
+//     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+//     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+//     DEALINGS IN THE SOFTWARE.
+// </copyright>
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -8,10 +33,6 @@ namespace YamORM
 {
     public sealed class DatabaseFactory : IDatabaseFactory
     {
-        #region Constants
-        const string DEFAULT_PROVIDER_NAME = "System.Data.SqlClient";
-        #endregion
-
         #region Singleton
         private static readonly DatabaseFactory _instance = new DatabaseFactory();
 
@@ -28,6 +49,7 @@ namespace YamORM
         #region Fields
         private IDbConnection _connection;
         private IList<TableConfiguration> _tableConfigurations;
+        private string _providerName;
         #endregion
 
         #region Properties
@@ -37,12 +59,11 @@ namespace YamORM
         #region Connection Methods
         public IDatabaseFactory Connection(string connectionString, string providerName)
         {
-            if(string.IsNullOrWhiteSpace(providerName))
-                providerName = DEFAULT_PROVIDER_NAME;
+            _providerName = providerName ?? Constants.DEFAULT_PROVIDER_NAME;
 
-            DbProviderFactory factory = DbProviderFactories.GetFactory(providerName);
+            DbProviderFactory factory = DbProviderFactories.GetFactory(_providerName);
             if (factory == null)
-                throw new Exception(string.Format("Could not obtain factory for provider: {0}", providerName));
+                throw new Exception(string.Format("Could not obtain factory for provider: {0}", _providerName));
 
             IDbConnection connection = factory.CreateConnection();
             if (connection == null)
@@ -76,7 +97,7 @@ namespace YamORM
         #region Database Methods
         public IDatabase CreateDatabase()
         {
-            return new Database(_connection, _tableConfigurations);
+            return new Database(_connection, _tableConfigurations, _providerName);
         }
         #endregion
     }

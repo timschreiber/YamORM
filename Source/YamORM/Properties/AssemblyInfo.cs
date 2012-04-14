@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("YamORM")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Timothy P. Schreiber")]
 [assembly: AssemblyProduct("YamORM")]
-[assembly: AssemblyCopyright("Copyright ©  2012")]
+[assembly: AssemblyCopyright("Copyright ©  2012. Licensed under the MIT License.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
