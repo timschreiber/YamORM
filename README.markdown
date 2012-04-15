@@ -1,4 +1,5 @@
 #Introducing YamORM
+<img src="http://timschreiber.com/YamORM_240x160.png" align="right" alt="YamORM"/>
 
 _"**Y**et **A**nother **M**icro-**ORM**."_
 
