@@ -91,6 +91,7 @@ The following code samples show the basic usage of YamORM
 * If POCO has a property that is just "Id" or the POCO type name concatenated with "Id," then that is assumed to be the Key property for the object. No database generation is assumed.
 * If the property names are the same as the column names, then they will be mapped automatically.
 
+With those rules in mind, the code required to configure the DatabaseFactory is quite a bit smaller:
 
     IDatabaseFactory factory = DatabaseFactory.Instance
         .Connection("ConnectionStringName")
