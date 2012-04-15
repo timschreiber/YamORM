@@ -1,3 +1,4 @@
+<div style="float:right"><img src="http://timschreiber.com/YamORM_240x160.png" alt="YamORM"/></div>
 #Introducing YamORM
 
 _"**Y**et **A**nother **M**icro-**ORM**."_
