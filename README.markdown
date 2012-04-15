@@ -49,7 +49,7 @@ Consider the following tables for all code samples:
     ALTER TABLE [dbo].[Product] CHECK CONSTRAINT [FK_Product_Category]
     GO
 
-And consider the following classes for all code samples.
+And consider the following classes for all code samples:
 
     public class Category
     {
@@ -68,7 +68,7 @@ And consider the following classes for all code samples.
 
 The following code samples show the basic usage of YamORM
 
-####Configure DatabaseFactory with Fluent mapping####
+####Configure DatabaseFactory with Fluent mapping
     
     IDatabaseFactory factory = DatabaseFactory.Instance
         .Connection("ConnectionStringName")
@@ -85,11 +85,12 @@ The following code samples show the basic usage of YamORM
             .Property(x => x.Price, "Price")
             .Configure();
 
-####Configure DatabaseFactory with Auto-mapping####
+####Configure DatabaseFactory with Auto-mapping
 
 * If POCO type and database table names match, then YamORM will map them automatically.
 * If POCO has a property that is just "Id" or the POCO type name concatenated with "Id," then that is assumed to be the Key property for the object. No database generation is assumed.
 * If the property names are the same as the column names, then they will be mapped automatically.
+
 
     IDatabaseFactory factory = DatabaseFactory.Instance
         .Connection("ConnectionStringName")
@@ -97,13 +98,16 @@ The following code samples show the basic usage of YamORM
             .Key(x => x.CategoryId, DatabaseGeneratedOption.Identity)
             .Configure()
         .Table<Product>()
-            .Configure();
+        .Configure();
 
-####Create Instance of YamORM Database####
+####Create Instance of YamORM Database
 
-    IDatabase data = factory.CreateDatabase();
+    using(IDatabase data = factory.CreateDatabase())
+    {
+        // Do stuff here...
+    }
 
-####Insert Records Using a Transaction####
+####Insert Records Using a Transaction
 
     Category category1 = new Category { Name = "Category 1" };
     Category category2 = new Category { Name = "Category 2" };
@@ -135,40 +139,47 @@ The following code samples show the basic usage of YamORM
         Console.WriteLine(ex.Message);
     }
 
-####Select All####
+####Select All
 
     IList<Product> products = data.Select<Product>();
     
-####Select By Key####
+####Select By Key
 
     Product product = data.Select<Product>("PROD123");
 
-####Update####
+####Update
 
     product.Price = 9.99M;
     data.Update(product);
 
-####Delete####
+####Delete
 
     data.Delete(product);
 
-####Execute SQL and Map Result to a POCO List####
+####Execute SQL and Map Result to a POCO List
 
     IList<Product> products = data.Query<Product>("SELECT ProductId, CategoryId, Name, Description, Price FROM Product WHERE CategoryId = @CategoryId")
         .Parameter("@CategoryId", 2)
         .Execute();
 
-####Execute SQL That Returns a Scalar Result####
+####Execute SQL That Returns a Scalar Result
 
     Category category3 = new Category { Name = "Category 3" };
     category3.CategoryId = data.Scalar<int>("INSERT INTO Category(Name) VALUES(@Name); SELECT SCOPE_IDENTITY();")
         .Parameter("@Name", category3.Name)
         .Execute();
 
-####Execute SQL That Doesn't Return Anything####
+####Execute SQL That Doesn't Return Anything
 
     data.NonQuery("DELETE FROM Product WHERE CategoryId < @MinCategoryId")
         .Parameter("@MinCategoryId", 2)
         .Execute();
 
-More to come soon.
+##Licensing
+YamORM is licensed under the MIT license.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
