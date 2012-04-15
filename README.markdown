@@ -1,36 +1,20 @@
-Full-scale ORMs like Entity Framework and NHibernate have become bloatware. It seems as though each subseqent version keeps trying to stuff in more functionality and abstract more data access from developers at the cost of complexity and performance. They may be appropriate for some large projects, but for others they may be overkill -- or killing performance. Sometimes it's better to go back to a simpler time, to get closer to the metal. Micro-ORMs fill that space. They do a subset of what an ORM does and do it fast.
+#Introducing YamORM
 
-YamORM is a Micro-ORM with a fluent interface for configuration and querying. It's a bit more formal and a little larger than other Micro-ORMs like Massive, Dapper, or PetaPoco; but it's becoming just as powerful and seems to be a little more friendly to IoC (at least as far as I've been able to tell). Its purpose is to balance ease of use with performance, and I think it's achieving that.
+_"**Y**et **A**nother **M**icro-**ORM**."_
 
-YamORM stands for "**Y**et **A**nother **M**icro-**ORM**."
-
-##Licensing
-[YamORM is licensed under the MIT license](/codeschreiber/YamORM/wiki/Licensing).
-
-##Roadmap
-
-* Support for returning dynamic objects (Expandos).
-* Performance optimization
-    * IL emission instead of reflection when populating objects from query results.
-    * Caching
-    * Creating CRUD commands during configuration instead of when they're called.
+YamORM is a micro-ORM for .NET that simplifies mapping objects to and from SQL queries and provides shortcuts for common CRUD functionality, without all the bloat, oatmeal SQL, and performance issues of a full-scale ORM like Entity Framework or NHibernate. It was designed to be fast, simple and straightforward, to support multiple database providers, and to run flawlessly in partial trust environments.
 
 ##Features
 
-* Currently supports SQL Server and MySQL databases, with more to come.
-* Fluent configuration interface for mapping objects to tables and properties to columns.
-* Simple, clean SQL generation for basic CRUD functionality: SELECT all, SELECT by Id, INSERT, UPDATE, and DELETE.
-* Support for Stored Procedures text queries, using a Fluent interface to:
-    * Set parameter names and values, and
-    * Map result columns to object properties
-* Auto-mapping of Tables and Columns if they match Object and Property names.
-* Auto-mapping of Keys if the Property and corresponding Column names match "Id" or "Id" appended to the Object name (underscores are ignored).
-* Support for Transactions
-* High performance - close to that of raw ADO.NET
+* Supports Auto-Mapping and also provides a Fluent interface for mapping your POCOs and properties to database tables and columns.
+* Generates clean SQL for basic CRUD operations.
+* Supports stored procedures and parameterized text queries.
+* Supports transactions.
+* Supports multiple databases (tested with SQL Server and MySQL).
 
 ## Code Samples
 
-Database tables for code samples
+Consider the following tables and objects for all code samples:
 
     CREATE TABLE [dbo].[Category](
         [CategoryId] [int] IDENTITY(1,1) NOT NULL,
@@ -40,13 +24,16 @@ Database tables for code samples
         [CategoryId] ASC
     )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
     ) ON [PRIMARY]
-
     GO
-
+    /****** Object:  Table [dbo].[Product]    Script Date: 04/14/2012 22:36:27 ******/
+    SET ANSI_NULLS ON
+    GO
+    SET QUOTED_IDENTIFIER ON
+    GO
     CREATE TABLE [dbo].[Product](
-        [ProductId] [nvarchar](10) NOT NULL,
+        [ProductId] [nchar](10) NOT NULL,
         [CategoryId] [int] NOT NULL,
-        [Name] [nvarchar](200) NOT NULL,
+        [Name] [nvarchar](50) NOT NULL,
         [Description] [nvarchar](1000) NOT NULL,
         [Price] [money] NOT NULL,
     CONSTRAINT [PK_Product] PRIMARY KEY CLUSTERED 
@@ -54,15 +41,29 @@ Database tables for code samples
         [ProductId] ASC
     )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
     ) ON [PRIMARY]
-
     GO
-
-    ALTER TABLE [dbo].[Product]  WITH NOCHECK ADD  CONSTRAINT [FK_Product_Category] FOREIGN KEY([CategoryId])
+    /****** Object:  ForeignKey [FK_Product_Category]    Script Date: 04/14/2012 22:36:27 ******/
+    ALTER TABLE [dbo].[Product]  WITH CHECK ADD  CONSTRAINT [FK_Product_Category] FOREIGN KEY([CategoryId])
     REFERENCES [dbo].[Category] ([CategoryId])
     GO
-
-    ALTER TABLE [dbo].[Product] NOCHECK CONSTRAINT [FK_Product_Category]
+    ALTER TABLE [dbo].[Product] CHECK CONSTRAINT [FK_Product_Category]
     GO
+
+
+    public class Category
+    {
+        public int CategoryId { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class Product
+    {
+        public string ProductId { get; set; }
+        public int CategoryId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+    }
 
 The following code samples show the basic usage of YamORM
 
