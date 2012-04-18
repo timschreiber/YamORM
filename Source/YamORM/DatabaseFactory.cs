@@ -33,54 +33,40 @@ namespace YamORM
 {
     public sealed class DatabaseFactory : IDatabaseFactory
     {
-        #region Singleton
-        private static readonly DatabaseFactory _instance = new DatabaseFactory();
+        #region Fields
+        private string _connectionString;
+        private string _providerName;
+        private IList<TableConfiguration> _tableConfigurations;
+        #endregion
 
-        public static DatabaseFactory Instance
-        {
-            get { return _instance; }
-        }
-        private DatabaseFactory()
+        #region Constructors
+        public DatabaseFactory()
         {
             _tableConfigurations = new List<TableConfiguration>();
         }
         #endregion
 
-        #region Fields
-        private IDbConnection _connection;
-        private IList<TableConfiguration> _tableConfigurations;
-        private string _providerName;
-        #endregion
-
         #region Properties
-        internal IList<TableConfiguration> TableConfigurations { get { return _tableConfigurations; } }
+        internal IList<TableConfiguration> TableConfigurations
+        {
+            get { return _tableConfigurations; }
+        }
         #endregion
 
         #region Connection Methods
         public IDatabaseFactory Connection(string connectionString, string providerName)
         {
+            _connectionString = connectionString;
             _providerName = providerName ?? Constants.DEFAULT_PROVIDER_NAME;
-
-            DbProviderFactory factory = DbProviderFactories.GetFactory(_providerName);
-            if (factory == null)
-                throw new Exception(string.Format("Could not obtain factory for provider: {0}", _providerName));
-
-            IDbConnection connection = factory.CreateConnection();
-            if (connection == null)
-                throw new Exception("Could not obtain connection from factory.");
-
-            connection.ConnectionString = connectionString;
-            _connection = connection;
-
             return this;
         }
 
         public IDatabaseFactory Connection(string connectionStringName)
         {
             ConnectionStringSettings connectionStringSettings = ConfigurationManager.ConnectionStrings[connectionStringName];
-            string connectionString = connectionStringSettings.ConnectionString;
-            string providerName = string.IsNullOrWhiteSpace(connectionStringSettings.ProviderName) ? null : connectionStringSettings.ProviderName;
-            return Connection(connectionString, providerName);
+            _connectionString = connectionStringSettings.ConnectionString;
+            _providerName = string.IsNullOrWhiteSpace(connectionStringSettings.ProviderName) ? Constants.DEFAULT_PROVIDER_NAME : connectionStringSettings.ProviderName;
+            return this;
         }
         #endregion
 
@@ -97,7 +83,17 @@ namespace YamORM
         #region Database Methods
         public IDatabase CreateDatabase()
         {
-            return new Database(_connection, _tableConfigurations, _providerName);
+            DbProviderFactory factory = DbProviderFactories.GetFactory(_providerName);
+            if (factory == null)
+                throw new Exception(string.Format("Could not obtain DbProviderFactory for provider: {0}", _providerName));
+
+            IDbConnection connection = factory.CreateConnection();
+            if (connection == null)
+                throw new Exception("Could not obtain connection from factory.");
+
+            connection.ConnectionString = _connectionString;
+
+            return new Database(connection, _tableConfigurations, _providerName);
         }
         #endregion
     }

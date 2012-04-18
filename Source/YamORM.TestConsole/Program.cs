@@ -33,13 +33,15 @@ namespace YamORM.TestConsole
     {
         static void Main(string[] args)
         {
-            IDatabase data = DatabaseFactory.Instance
+            IDatabaseFactory factory = new DatabaseFactory()
                 .Connection("TestDb")
                 .Table<Category>()
                     .Key(x => x.CategoryId, DatabaseGeneratedOption.Identity)
                     .Configure()
-                .Table<Product>().Configure()
-                .CreateDatabase();
+                .Table<Product>()
+                    .Configure();
+
+            IDatabase data = factory.CreateDatabase();
 
             Category category1 = new Category { Name = "Category 1" };
             Category category2 = new Category { Name = "Category 2" };
