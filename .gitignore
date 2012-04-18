@@ -1,0 +1,4 @@
+*.csproj.user
+Source/*/[Oo]bj/*
+Source/*/[Bb]in/*
+*.suo
